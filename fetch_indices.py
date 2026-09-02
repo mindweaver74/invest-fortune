@@ -73,22 +73,46 @@ def fetch_naver_index(code):
         print(f"  ⚠️  {code} 응답 구조에서 데이터 항목을 찾지 못함")
         return None
 
-    # 가능한 필드명 후보들을 모두 시도 (실제 필드명이 확인되면 여기만 좁히면 됨)
-    cur = _first_of(item, ["nv", "closePrice", "tradePrice", "close", "currentPrice", "price"])
-    prev = _first_of(item, ["pcv", "prevClosePrice", "basePrice", "previousClose", "sv"])
-    chg = _first_of(item, ["cv", "changePrice", "change", "compareToPreviousClosePrice"])
-    chg_pct = _first_of(item, ["cr", "changeRate", "fluctuationsRatio", "rate"])
+    # 실제 확인된 필드명(2026-09): closePrice, compareToPreviousClosePrice, fluctuationsRatio
+    # 단, 값이 "6,628.15" 같은 콤마 포함 문자열로 오므로 반드시 정제 후 float 변환해야 함
+    cur_raw = _first_of(item, ["closePrice", "nv", "tradePrice", "close", "currentPrice", "price"])
+    chg_raw = _first_of(item, ["compareToPreviousClosePrice", "cv", "changePrice", "change"])
+    pct_raw = _first_of(item, ["fluctuationsRatio", "cr", "changeRate", "rate"])
+    prev_raw = _first_of(item, ["pcv", "prevClosePrice", "basePrice", "previousClose", "sv"])
+
+    def to_float(v):
+        """'6,628.15' / '-207.65' / 6628.15 등 다양한 형태를 float로 안전 변환."""
+        if v is None:
+            return None
+        if isinstance(v, (int, float)):
+            return float(v)
+        s = str(v).replace(",", "").strip()
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    cur = to_float(cur_raw)
+    prev = to_float(prev_raw)
+    chg = to_float(chg_raw)
+    chg_pct = to_float(pct_raw)
 
     if cur is None:
         print(f"  ⚠️  {code} 현재가 필드를 찾지 못함. 항목 내용: {json.dumps(item, ensure_ascii=False)[:300]}")
         return None
 
-    cur = float(cur)
-    prev = float(prev) if prev is not None else None
-    chg = float(chg) if chg is not None else (cur - prev if prev is not None else 0.0)
-    chg_pct = float(chg_pct) if chg_pct is not None else (
-        (chg / prev * 100) if prev else 0.0
-    )
+    # 등락 방향(하락이면 부호를 음수로) — compareToPreviousPrice.code: "1"상한 "2"상승 "3"보합 "4"하한 "5"하락
+    direction = item.get("compareToPreviousPrice", {})
+    if isinstance(direction, dict) and direction.get("code") in ("4", "5"):
+        if chg is not None and chg > 0:
+            chg = -chg
+        if chg_pct is not None and chg_pct > 0:
+            chg_pct = -chg_pct
+
+    if chg is None:
+        chg = (cur - prev) if prev is not None else 0.0
+    if chg_pct is None:
+        chg_pct = (chg / prev * 100) if prev else 0.0
 
     return {
         "val": round(cur, 2),
