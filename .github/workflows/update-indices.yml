@@ -11,6 +11,12 @@ on:
 permissions:
   contents: write
 
+# 같은 워크플로우가 겹쳐서 실행되는 것을 방지 (push 충돌의 주 원인)
+# 새 실행이 시작되면 이전에 대기 중이던 실행은 취소하고 최신 것만 진행
+concurrency:
+  group: update-indices
+  cancel-in-progress: false
+
 jobs:
   update-indices:
     runs-on: ubuntu-latest
@@ -29,10 +35,23 @@ jobs:
       - name: 지수 데이터 수집
         run: python fetch_indices.py
 
-      - name: 변경사항 커밋 & 푸시
+      - name: 변경사항 커밋 & 푸시 (충돌 시 재시도)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/indices.json
-          git diff --staged --quiet || git commit -m "chore: update market indices ($(date -u +'%Y-%m-%d %H:%M UTC'))"
-          git push
+          git diff --staged --quiet && { echo "변경사항 없음 - 건너뜀"; exit 0; }
+          git commit -m "chore: update market indices ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+
+          # push 시도, 실패하면 최신 내용 받아서 재시도 (최대 5회)
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "✅ push 성공"
+              exit 0
+            fi
+            echo "⚠️  push 실패, 재시도 $i/5 ..."
+            git pull --rebase origin main
+            sleep 3
+          done
+          echo "❌ 5회 재시도 후에도 실패"
+          exit 1
