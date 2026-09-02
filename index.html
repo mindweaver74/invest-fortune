@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="오늘의 지수 흐름과 나의 투자 운세를 함께 확인하세요. 매수·관망·분할매수 타이밍을 운세로 풀어드려요.">
+<meta property="og:title" content="📈🔮 오늘의 투자 운세">
+<title>📈🔮 오늘의 투자 운세</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8357338943233901" crossorigin="anonymous"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
+html,body{width:100%;min-height:100%;background:linear-gradient(160deg,#0d1b2a,#1a2f4a,#0d1b2a);
+  font-family:-apple-system,'Apple SD Gothic Neo',Arial,sans-serif;color:#fff;}
+#wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:max(16px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));
+  max-width:480px;margin:0 auto;gap:12px;}
+
+/* 헤더 */
+#hdr{width:100%;text-align:center;padding:4px 0;}
+#hdr h1{font-size:22px;font-weight:900;
+  background:linear-gradient(135deg,#f39c12,#e74c3c,#9b59b6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:3px;}
+#hdr p{font-size:11px;color:rgba(255,255,255,0.4);}
+
+/* 카드 공통 */
+.card{width:100%;background:rgba(255,255,255,0.05);border-radius:18px;padding:16px;
+  border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(10px);}
+.card-title{font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);
+  letter-spacing:1.5px;margin-bottom:12px;text-transform:uppercase;}
+
+/* 지수 카드 */
+.index-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.index-item{background:rgba(255,255,255,0.04);border-radius:12px;padding:10px 12px;
+  border:1px solid rgba(255,255,255,0.06);}
+.index-name{font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px;}
+.index-val{font-size:16px;font-weight:900;color:#fff;margin-bottom:2px;}
+.index-chg{font-size:11px;font-weight:700;}
+.up{color:#2ecc71;} .dn{color:#e74c3c;} .flat{color:rgba(255,255,255,0.4);}
+.index-bar{height:3px;border-radius:2px;background:rgba(255,255,255,0.08);margin-top:6px;overflow:hidden;}
+.index-bar-fill{height:100%;border-radius:2px;transition:width .8s;}
+#idx-loading{text-align:center;padding:12px;font-size:12px;color:rgba(255,255,255,0.35);}
+#idx-err{display:none;text-align:center;font-size:11px;color:rgba(255,255,255,0.3);padding:8px;}
+
+/* 입력 */
+.f-label{font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:8px;display:block;}
+.f-row{display:flex;gap:8px;}
+.f-input{flex:1;padding:11px 14px;border-radius:12px;
+  border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);
+  font-size:15px;color:#fff;outline:none;text-align:center;-webkit-appearance:none;}
+.f-input:focus{border-color:#f39c12;}
+.f-input::placeholder{color:rgba(255,255,255,0.25);}
+#btn-calc{padding:11px 18px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;
+  font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.lunar-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.lunar-row label{display:flex;align-items:center;gap:5px;cursor:pointer;
+  font-size:12px;color:rgba(255,255,255,0.5);}
+.lunar-row input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:#f39c12;}
+#lunar-cvt{font-size:11px;color:#f39c12;display:none;}
+.f-hint{font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;}
+
+/* 운세 결과 */
+#result{display:none;width:100%;}
+
+/* 투자 운세 점수 */
+.fortune-score-wrap{text-align:center;margin-bottom:14px;}
+.fortune-grade{font-size:44px;margin-bottom:4px;}
+.fortune-grade-txt{font-size:18px;font-weight:900;margin-bottom:2px;}
+.fortune-stars{font-size:16px;color:#f39c12;margin-bottom:6px;}
+.fortune-subtitle{font-size:11px;color:rgba(255,255,255,0.4);}
+
+/* 4대 운세 바 */
+.bars{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.bar-row{background:rgba(255,255,255,0.04);border-radius:12px;padding:10px 12px;}
+.bar-label{font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:5px;}
+.bar-name{font-size:12px;font-weight:700;color:#fff;margin-bottom:6px;}
+.bar-bg{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .7s;}
+.bar-val{font-size:11px;font-weight:700;margin-top:4px;text-align:right;}
+
+/* 오늘의 투자 조언 */
+.advice-card{border-radius:14px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden;}
+.advice-card::before{content:'';position:absolute;top:-20px;right:-20px;
+  width:80px;height:80px;border-radius:50%;opacity:0.15;}
+.advice-title{font-size:10px;font-weight:700;letter-spacing:1px;
+  color:rgba(255,255,255,0.5);margin-bottom:6px;}
+.advice-main{font-size:18px;font-weight:900;margin-bottom:6px;}
+.advice-desc{font-size:12px;color:rgba(255,255,255,0.65);line-height:1.7;}
+
+/* 섹터 관심 */
+.sector-title{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:8px;letter-spacing:.5px;}
+.sector-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+.sector-chip{background:rgba(255,255,255,0.05);border-radius:10px;padding:8px 10px;
+  border:1px solid rgba(255,255,255,0.07);}
+.sector-emoji{font-size:16px;margin-bottom:3px;}
+.sector-name{font-size:11px;font-weight:700;color:#fff;}
+.sector-reason{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;line-height:1.4;}
+.sector-tag{display:inline-block;font-size:9px;border-radius:20px;padding:1px 7px;
+  margin-top:4px;font-weight:700;}
+
+/* 오늘의 한마디 */
+.quote-card{background:linear-gradient(135deg,rgba(243,156,18,0.1),rgba(155,89,182,0.1));
+  border-radius:14px;padding:14px;border:1px solid rgba(243,156,18,0.2);margin-bottom:10px;}
+.quote-txt{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.8;font-style:italic;}
+.quote-src{font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;text-align:right;}
+
+/* 면책 고지 */
+.disclaimer{background:rgba(231,76,60,0.08);border-radius:12px;padding:12px;
+  border:1px solid rgba(231,76,60,0.15);}
+.disclaimer p{font-size:10px;color:rgba(255,255,255,0.35);line-height:1.7;}
+
+/* 버튼 */
+#btn-reset{width:100%;padding:11px;border-radius:50px;margin-top:4px;
+  border:1px solid rgba(255,255,255,0.1);background:transparent;
+  color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;}
+
+#footer{margin-top:auto;padding-top:12px;text-align:center;}
+#footer a{font-size:10px;color:rgba(255,255,255,0.2);text-decoration:none;margin:0 6px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="hdr">
+    <h1>📈🔮 오늘의 투자 운세</h1>
+    <p>지수 흐름 + 나의 운세로 오늘 투자 심리를 점검해요</p>
+  </div>
+
+  <!-- 지수 현황 -->
+  <div class="card">
+    <div class="card-title">📊 오늘의 시장 지수</div>
+    <div id="idx-loading">📡 지수 데이터 불러오는 중...</div>
+    <div id="idx-err">지수 데이터를 아직 불러오지 못했어요<br>
+    <span style="font-size:10px;">(자동 갱신 전이거나 일시 오류 · 운세는 정상 확인 가능!)</span><br>
+    <a href="https://finance.naver.com/sise/" target="_blank" style="display:inline-block;margin-top:8px;padding:6px 14px;border-radius:20px;background:rgba(46,204,113,0.15);color:#2ecc71;font-size:11px;text-decoration:none;border:1px solid rgba(46,204,113,0.3);">📊 네이버 금융에서 지수 확인 →</a></div>
+    <div class="index-grid" id="idx-grid" style="display:none;"></div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:8px;text-align:right;" id="idx-time"></div>
+  </div>
+
+  <!-- 생년월일 입력 -->
+  <div class="card">
+    <div class="card-title">🔮 투자 운세 계산</div>
+    <label class="f-label">생년월일을 입력하세요</label>
+    <div class="f-row">
+      <input class="f-input" id="birth" type="number" placeholder="예) 19900315" inputmode="numeric">
+      <button id="btn-calc" onclick="calc()">운세 보기</button>
+    </div>
+    <div class="lunar-row">
+      <label>
+        <input type="checkbox" id="lunar">
+        🌙 음력 생년월일
+      </label>
+      <span id="lunar-cvt"></span>
+    </div>
+    <div class="f-hint">* 8자리 숫자 (YYYYMMDD) · 저장되지 않아요</div>
+  </div>
+
+  <!-- 결과 -->
+  <div id="result">
+
+    <!-- 투자 운세 점수 -->
+    <div class="card">
+      <div class="card-title">🎯 오늘의 투자 운세</div>
+      <div class="fortune-score-wrap">
+        <div class="fortune-grade" id="f-grade">🔮</div>
+        <div class="fortune-grade-txt" id="f-grade-txt">--</div>
+        <div class="fortune-stars" id="f-stars">☆☆☆☆☆</div>
+        <div class="fortune-subtitle" id="f-subtitle">--</div>
+      </div>
+      <div class="bars">
+        <div class="bar-row">
+          <div class="bar-label">💰 금전운</div>
+          <div class="bar-name" id="bn-money">--</div>
+          <div class="bar-bg"><div class="bar-fill" id="bf-money" style="background:#f39c12;width:0%"></div></div>
+          <div class="bar-val" id="bv-money" style="color:#f39c12;">-</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">📈 판단력</div>
+          <div class="bar-name" id="bn-judge">--</div>
+          <div class="bar-bg"><div class="bar-fill" id="bf-judge" style="background:#3498db;width:0%"></div></div>
+          <div class="bar-val" id="bv-judge" style="color:#3498db;">-</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">🎲 승부운</div>
+          <div class="bar-name" id="bn-luck">--</div>
+          <div class="bar-bg"><div class="bar-fill" id="bf-luck" style="background:#9b59b6;width:0%"></div></div>
+          <div class="bar-val" id="bv-luck" style="color:#9b59b6;">-</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">🧘 심리안정</div>
+          <div class="bar-name" id="bn-mind">--</div>
+          <div class="bar-bg"><div class="bar-fill" id="bf-mind" style="background:#2ecc71;width:0%"></div></div>
+          <div class="bar-val" id="bv-mind" style="color:#2ecc71;">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오늘의 투자 조언 -->
+    <div class="advice-card" id="advice-card">
+      <div class="advice-title">💡 오늘의 투자 스탠스</div>
+      <div class="advice-main" id="advice-main">--</div>
+      <div class="advice-desc" id="advice-desc">--</div>
+    </div>
+
+    <!-- 관심 섹터 -->
+    <div class="card">
+      <div class="card-title">🏭 오늘 눈여겨볼 섹터</div>
+      <div class="sector-title">※ 투자 참고용 섹터 분위기 안내 (종목 추천 아님)</div>
+      <div class="sector-grid" id="sector-grid"></div>
+    </div>
+
+    <!-- 오늘의 한마디 -->
+    <div class="quote-card">
+      <div class="quote-txt" id="quote-txt">--</div>
+      <div class="quote-src" id="quote-src">--</div>
+    </div>
+
+    <!-- 면책 고지 -->
+    <div class="disclaimer">
+      <p>⚠️ <strong>투자 유의사항:</strong> 본 콘텐츠는 오락·참고 목적의 운세 콘텐츠로, 실제 투자 권유나 종목 추천이 아닙니다. 투자 판단과 손실의 책임은 투자자 본인에게 있으며, 반드시 전문가 상담 및 본인의 판단에 따라 투자하시기 바랍니다.</p>
+    </div>
+
+    <button id="btn-reset" onclick="reset()">↺ 다시 입력</button>
+  </div>
+
+  <div id="footer">
+    <a href="https://mindweaver74.github.io/Jutopia">🎮 Jutopia</a>
+    <a href="https://mindweaver74.github.io/Jutopia/privacy.html">개인정보처리방침</a>
+  </div>
+</div>
+
+<script>
+// ── 음력→양력 변환 ──
+var LUNAR_DATA={
+  1940:[1,27,[30,29,30,29,30,30,29,30,29,30,29,30]],
+  1941:[2,15,[30,29,29,30,29,30,29,30,30,29,30,30]],
+  1942:[2,5,[29,30,29,29,30,29,30,29,30,29,30,30]],
+  1943:[1,25,[30,30,29,30,29,30,29,29,30,29,30,29,30]],
+  1944:[2,13,[30,29,30,30,29,30,29,30,29,30,29,29]],
+  1945:[2,2,[30,29,30,30,29,30,29,30,30,29,30,29]],
+  1946:[1,22,[30,29,30,29,30,30,29,30,30,29,30,29]],
+  1947:[2,10,[29,30,29,29,30,30,29,30,30,29,30,30]],
+  1948:[1,29,[29,30,29,29,30,29,30,29,30,30,29,30,30]],
+  1949:[2,17,[29,30,29,30,29,29,30,29,30,29,30,30]],
+  1950:[2,6,[30,29,30,29,30,29,29,30,29,30,29,30]],
+  1951:[1,27,[29,30,30,29,30,29,30,29,30,29,30,29]],
+  1952:[2,14,[30,29,30,29,30,30,29,30,29,30,29,29,30]],
+  1953:[2,3,[30,30,29,30,29,30,29,30,30,29,30,29]],
+  1954:[1,24,[29,30,29,30,29,30,30,29,30,29,30,30]],
+  1955:[1,12,[29,30,29,29,30,30,29,30,29,30,30,29]],
+  1956:[1,31,[30,29,30,29,29,30,29,30,29,30,30,30]],
+  1957:[1,21,[29,30,29,30,29,29,30,29,30,29,30,30,29]],
+  1958:[2,8,[30,30,29,30,29,30,29,29,30,29,30,29]],
+  1959:[1,28,[30,30,29,30,30,29,30,29,29,30,29,30]],
+  1960:[1,18,[29,30,29,30,30,29,30,29,30,29,30,29]],
+  1961:[2,5,[30,29,30,29,30,29,30,30,29,30,29,30]],
+  1962:[1,25,[29,30,29,29,30,29,30,30,29,30,30,29,30]],
+  1963:[2,13,[29,30,29,30,29,30,29,29,30,30,29,30]],
+  1964:[2,2,[29,30,30,29,30,29,30,29,29,30,29,30]],
+  1965:[1,21,[29,30,30,29,30,30,29,30,29,29,30,29,29]],
+  1966:[1,21,[30,30,29,30,30,29,30,29,30,29,30,29]],
+  1967:[2,9,[30,29,30,29,30,29,30,30,29,30,29,30]],
+  1968:[1,30,[29,30,29,29,30,29,30,30,30,29,30,29]],
+  1969:[2,17,[30,29,30,29,29,30,29,30,30,29,30,30]],
+  1970:[2,6,[29,30,29,30,29,30,29,29,30,29,30,30,29]],
+  1971:[1,27,[30,29,30,30,29,30,29,29,30,29,30,29]],
+  1972:[2,15,[30,29,30,30,29,30,30,29,29,30,29,30]],
+  1973:[2,3,[29,30,29,30,29,30,30,29,30,30,29,29]],
+  1974:[1,23,[30,29,30,29,30,29,30,29,30,30,29,30]],
+  1975:[2,11,[29,30,29,29,30,29,30,29,30,30,30,29,30]],
+  1976:[1,31,[29,30,29,30,29,30,29,30,29,30,29,30]],
+  1977:[2,18,[29,30,29,30,30,29,30,29,30,29,30,29]],
+  1978:[2,7,[30,29,30,29,30,29,30,30,29,30,29,30]],
+  1979:[1,28,[29,30,29,29,30,29,30,30,29,30,30,29,30]],
+  1980:[2,16,[29,30,29,30,29,30,29,29,30,30,29,30]],
+  1981:[2,5,[29,30,29,30,30,29,30,29,29,30,29,30]],
+  1982:[1,25,[30,29,30,29,30,29,30,30,29,29,30,29,30]],
+  1983:[2,13,[30,30,29,30,29,30,29,30,30,29,29,30]],
+  1984:[2,2,[29,30,29,30,29,30,29,30,30,29,30,29]],
+  1985:[2,20,[30,29,30,29,30,29,30,29,30,29,30,30]],
+  1986:[2,9,[29,30,29,30,29,30,29,30,29,30,29,30]],
+  1987:[1,29,[29,30,29,30,30,29,30,29,30,29,30,29]],
+  1988:[2,17,[30,29,30,29,30,29,30,30,29,30,29,30]],
+  1989:[2,6,[29,30,29,29,30,29,30,30,29,30,30,29]],
+  1990:[1,27,[30,29,30,29,29,30,29,30,29,30,30,30]],
+  1991:[2,15,[29,30,29,30,29,29,30,29,30,29,30,30]],
+  1992:[2,4,[29,30,30,29,30,29,29,30,29,30,29,30]],
+  1993:[1,23,[29,30,30,29,30,29,30,29,30,29,30,29]],
+  1994:[2,10,[30,29,30,29,30,30,29,30,29,30,29,29]],
+  1995:[1,31,[30,29,30,29,30,30,29,30,30,29,30,29]],
+  1996:[2,19,[29,30,29,30,29,30,29,30,30,29,30,30]],
+  1997:[2,7,[29,29,30,29,30,29,30,29,30,29,30,30]],
+  1998:[1,28,[29,30,29,30,29,30,29,30,29,30,29,30]],
+  1999:[2,16,[29,30,29,30,30,29,30,29,30,29,30,29]],
+  2000:[2,5,[30,29,29,30,30,29,30,30,29,30,29,30]],
+  2001:[1,24,[29,30,29,29,30,29,30,30,29,30,30,29]],
+  2002:[2,12,[30,29,30,29,29,30,29,30,29,30,30,30]],
+  2003:[2,1,[29,30,29,30,29,29,30,29,30,29,30,30]],
+  2004:[1,22,[29,30,29,30,30,29,29,30,29,30,29,30]],
+  2005:[2,9,[29,30,29,30,30,29,30,29,30,29,30,29]],
+  2006:[1,29,[30,29,30,29,30,29,30,30,29,30,29,30]],
+  2007:[2,18,[29,29,30,29,30,29,30,30,29,30,30,29]],
+  2008:[2,7,[30,29,29,30,29,30,29,30,29,30,30,30]],
+  2009:[1,26,[29,30,29,29,30,29,30,29,30,29,30,30]],
+  2010:[2,14,[29,30,29,30,29,30,29,29,30,29,30,29]],
+  2011:[2,3,[30,30,29,30,29,30,29,30,29,30,29,29]],
+  2012:[1,23,[30,30,29,30,30,29,30,29,30,29,30,29]],
+  2013:[2,10,[29,30,29,30,30,29,30,30,29,30,29,30]],
+  2014:[1,31,[29,29,30,29,30,29,30,30,29,30,30,29]],
+  2015:[2,19,[30,29,29,30,29,30,29,30,29,30,30,30]],
+  2016:[2,8,[29,30,29,29,30,29,30,29,30,29,30,30]],
+  2017:[1,28,[29,30,29,30,29,30,29,30,29,30,29,30]],
+  2018:[2,16,[29,30,29,30,29,30,30,29,30,29,30,29]],
+  2019:[2,5,[30,29,30,29,30,29,30,29,30,30,29,30]],
+  2020:[1,25,[29,30,29,30,29,29,30,29,30,30,30,29]],
+};
+function lunarToSolar(ly,lm,ld){
+  var d=LUNAR_DATA[ly]; if(!d)return null;
+  var base=new Date(ly,d[0]-1,d[1]),offset=0;
+  for(var m=1;m<lm;m++) offset+=d[2][m-1]||29;
+  offset+=ld-1;
+  var r=new Date(base.getTime()+offset*86400000);
+  return{year:r.getFullYear(),month:r.getMonth()+1,day:r.getDate()};
+}
+
+// ── 지수 데이터 (GitHub Actions가 미리 수집한 JSON 읽기) ──
+// data/indices.json은 GitHub Actions가 주기적으로(평일 09~16시 매시간)
+// Yahoo Finance에서 직접 가져와 저장해두는 파일입니다.
+// 브라우저는 같은 저장소의 파일만 읽으므로 CORS 문제가 없습니다.
+var idxData={};
+
+function fetchIndex(){
+  fetch('./data/indices.json', {cache:'no-store'})
+    .then(function(r){
+      if(!r.ok) throw new Error('파일 없음');
+      return r.json();
+    })
+    .then(function(data){
+      document.getElementById('idx-loading').style.display='none';
+      var indices = data.indices || [];
+      if(!indices.length){
+        document.getElementById('idx-err').style.display='block';
+        setIdxSentiment(0);
+        return;
+      }
+      document.getElementById('idx-grid').style.display='grid';
+      var grid=document.getElementById('idx-grid');
+      grid.innerHTML='';
+      indices.forEach(function(v){
+        idxData[v.name]=v;
+        var isUp=v.chg>=0, pct=Math.abs(v.chgPct);
+        var barW=Math.min(pct/3*100,100);
+        var item=document.createElement('div');
+        item.className='index-item';
+        item.innerHTML=
+          '<div class="index-name">'+v.flag+' '+v.name+'</div>'+
+          '<div class="index-val">'+v.val.toLocaleString(undefined,{maximumFractionDigits:2})+'</div>'+
+          '<div class="index-chg '+(isUp?'up':'dn')+'">'+
+            (isUp?'▲':'▼')+' '+pct.toFixed(2)+'%</div>'+
+          '<div class="index-bar"><div class="index-bar-fill" style="width:'+barW+'%;background:'+(isUp?'#2ecc71':'#e74c3c')+'"></div></div>';
+        grid.appendChild(item);
+      });
+
+      // 업데이트 시각 표시
+      var updatedTxt = '기준: ';
+      try{
+        var d = new Date(data.updated_at);
+        updatedTxt += d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 자동 갱신';
+      }catch(e){ updatedTxt += '최근 자동 갱신'; }
+      document.getElementById('idx-time').textContent = updatedTxt;
+
+      var avgChg=indices.reduce(function(s,v){return s+v.chgPct;},0)/indices.length;
+      setIdxSentiment(avgChg);
+    })
+    .catch(function(){
+      document.getElementById('idx-loading').style.display='none';
+      document.getElementById('idx-err').style.display='block';
+      setIdxSentiment(0);
+    });
+}
+
+var marketSentiment=0; // -3~+3 (시장 방향성)
+function setIdxSentiment(avgChg){
+  marketSentiment=Math.max(-3,Math.min(3,avgChg));
+}
+
+// ── 운세 계산 ──
+var FORTUNE_GRADES=[
+  {min:85,emoji:'🌟',txt:'투자 대길일',sub:'오늘은 별들이 당신 편!',color:'#f39c12',advice:'적극 매수',aColor:'rgba(243,156,18,0.15)'},
+  {min:70,emoji:'☀️',txt:'투자 길일',sub:'긍정적인 흐름의 하루',color:'#2ecc71',advice:'관심 종목 분할 매수 고려',aColor:'rgba(46,204,113,0.12)'},
+  {min:55,emoji:'⛅',txt:'보통',sub:'평온한 흐름, 신중하게',color:'#3498db',advice:'관망 또는 소량 매수',aColor:'rgba(52,152,219,0.12)'},
+  {min:40,emoji:'☁️',txt:'주의 필요',sub:'오늘은 서두르지 마세요',color:'#e67e22',advice:'관망 추천',aColor:'rgba(230,126,34,0.12)'},
+  {min:0, emoji:'⛈️',txt:'투자 흉일',sub:'리스크 관리에 집중하는 날',color:'#e74c3c',advice:'매도 or 현금 보유',aColor:'rgba(231,76,60,0.12)'},
+];
+
+var ADVICE_DETAILS={
+  '투자 대길일':[
+    '오늘은 직감이 날카롭고 판단력이 뛰어난 날이에요. 평소 관심 갖던 종목에 과감하게 접근해볼 만한 타이밍입니다. 단, 욕심은 금물 — 목표 수익률을 미리 정하고 지키세요.',
+    '에너지가 넘치고 긍정적인 기운이 충만한 날! 시장 흐름을 잘 읽을 수 있는 날이니 적극적으로 시장에 참여해보세요. 다만 레버리지 과용은 항상 주의하세요.',
+  ],
+  '투자 길일':[
+    '전반적으로 긍정적인 에너지의 날이에요. 분할 매수 전략으로 차근차근 접근하면 좋겠습니다. 급하게 전부 투자하기보다 1/3씩 나눠서 진입하는 것을 권장해요.',
+    '오늘은 운이 따르는 날이지만 신중함도 함께하면 더욱 빛납니다. 오전 시장 흐름을 보고 오후에 결정하는 전략도 좋아요.',
+  ],
+  '보통':[
+    '오늘은 크게 욕심 내지 않는 것이 좋아요. 기존 보유 종목을 점검하고 포트폴리오 균형을 살펴보는 날로 활용해보세요.',
+    '시장을 관찰하면서 다음 기회를 준비하는 날이에요. 무리한 신규 투자보다는 공부와 분석에 집중하는 것을 추천해요.',
+  ],
+  '주의 필요':[
+    '오늘은 성급한 판단을 자제하는 것이 좋아요. 손절해야 할 종목이 있다면 감정적으로 대응하지 말고 냉정하게 판단하세요.',
+    '리스크 관리가 중요한 날이에요. 신규 매수는 자제하고 기존 포지션을 점검하며 손실을 최소화하는 데 집중하세요.',
+  ],
+  '투자 흉일':[
+    '오늘은 시장과 잠시 거리를 두는 것이 상책이에요. 현금 비중을 높이고 충동적인 매매를 삼가세요. 때로는 아무것도 하지 않는 것이 최고의 전략입니다.',
+    '오늘은 쉬어가는 날이에요. 억지로 수익을 내려 하다 손실이 커질 수 있어요. 내일 더 좋은 기회가 올 거예요.',
+  ],
+};
+
+var SECTORS=[
+  {emoji:'💻',name:'IT·반도체',  reason:'기술주 성장세 관심',  tags:['growth','volatile']},
+  {emoji:'🏦',name:'금융·은행',   reason:'금리 환경 영향',       tags:['defensive','stable']},
+  {emoji:'💊',name:'바이오·헬스', reason:'방어주 성격',           tags:['defensive','growth']},
+  {emoji:'⚡',name:'에너지',       reason:'원자재 흐름 연동',     tags:['volatile','value']},
+  {emoji:'🏗️',name:'건설·인프라', reason:'경기민감주',           tags:['value','volatile']},
+  {emoji:'🛍️',name:'소비재',      reason:'내수 경기 반영',        tags:['stable','defensive']},
+  {emoji:'🔋',name:'2차전지',     reason:'전기차 테마 관심',      tags:['growth','volatile']},
+  {emoji:'🌾',name:'농산물·식품', reason:'필수소비재 안정성',     tags:['defensive','stable']},
+  {emoji:'🚀',name:'우주·방산',   reason:'글로벌 테마 관심',      tags:['growth','volatile']},
+  {emoji:'🏠',name:'리츠·부동산', reason:'금리 민감 배당주',      tags:['value','stable']},
+  {emoji:'🌍',name:'글로벌ETF',   reason:'분산투자 대안',          tags:['stable','defensive']},
+  {emoji:'💴',name:'달러·환율',   reason:'환율 헤지 관심',         tags:['defensive','stable']},
+];
+
+function getSectorTag(tag){
+  var map={growth:{txt:'성장주',color:'#9b59b6'},volatile:{txt:'변동성',color:'#e74c3c'},
+    defensive:{txt:'방어주',color:'#2ecc71'},stable:{txt:'안정',color:'#3498db'},
+    value:{txt:'가치주',color:'#f39c12'}};
+  var t=map[tag];
+  return t?'<span class="sector-tag" style="background:'+t.color+'22;color:'+t.color+'">'+t.txt+'</span>':'';
+}
+
+function rng(s){s=(s^(s>>16))*0x45d9f3b;s=(s^(s>>16))*0x45d9f3b;return(s^(s>>16))>>>0;}
+
+var QUOTES=[
+  {txt:'주식 시장은 조급한 사람의 돈을 인내심 있는 사람에게 이전하는 장치다.',src:'— 워런 버핏'},
+  {txt:'위험은 자신이 무엇을 하는지 모르는 데서 온다.',src:'— 워런 버핏'},
+  {txt:'시장을 예측하는 것은 불가능하다. 중요한 것은 대응이다.',src:'— 피터 린치'},
+  {txt:'성공한 투자자는 시장의 변동성을 친구로 삼는다.',src:'— 존 보글'},
+  {txt:'좋은 주식을 사서 잊어버려라. 시간이 그것을 증명한다.',src:'— 필립 피셔'},
+  {txt:'모든 사람이 공포에 빠질 때 탐욕스럽게, 모두가 탐욕스러울 때 공포스럽게.',src:'— 워런 버핏'},
+  {txt:'최고의 투자는 자기 자신에 대한 투자다.',src:'— 워런 버핏'},
+  {txt:'분산투자는 무지에 대한 헤지이다. 자신이 무엇을 하는지 알고 있다면 분산할 이유가 별로 없다.',src:'— 워런 버핏'},
+  {txt:'10년 동안 주식을 보유할 자신이 없다면 10분도 보유하지 마라.',src:'— 워런 버핏'},
+  {txt:'주식 시장에서 가장 위험한 말은 "이번엔 다르다"이다.',src:'— 존 템플턴'},
+  {txt:'투자는 지루해야 한다. 흥미진진하다면 아마 도박에 가까울 것이다.',src:'— 조지 소로스'},
+  {txt:'단기 시장 변동은 소음이다. 장기 추세가 신호다.',src:'— 피터 린치'},
+];
+
+function calc(){
+  var raw=document.getElementById('birth').value.replace(/\D/g,'');
+  if(raw.length<6){alert('생년월일을 6자리 이상 입력해주세요');return;}
+  var y=parseInt(raw.slice(0,4))||1990;
+  var m=parseInt(raw.slice(4,6))||1;
+  var d=parseInt(raw.slice(6,8))||1;
+
+  // 음력 변환
+  if(document.getElementById('lunar').checked){
+    var cv=lunarToSolar(y,m,d);
+    if(cv){y=cv.year;m=cv.month;d=cv.day;
+      var el=document.getElementById('lunar-cvt');
+      el.style.display='inline';el.textContent='→ 양력 '+y+'년 '+m+'월 '+d+'일';}
+  }
+
+  var today=new Date();
+  var seed=y*10000+m*100+d+today.getFullYear()*365+today.getMonth()*31+today.getDate();
+  var r1=rng(seed),r2=rng(seed+1),r3=rng(seed+2),r4=rng(seed+3);
+
+  var money =35+(r1%60);
+  var judge =35+(r2%60);
+  var luck  =35+(r3%60);
+  var mind  =35+(r4%60);
+
+  // 시장 심리 반영 (±10점)
+  var mBonus=Math.round(marketSentiment*3);
+  money =Math.max(5,Math.min(99,money +mBonus));
+  judge =Math.max(5,Math.min(99,judge +mBonus));
+
+  var total=Math.round((money+judge+luck+mind)/4);
+
+  // 등급
+  var grade=FORTUNE_GRADES[FORTUNE_GRADES.length-1];
+  for(var i=0;i<FORTUNE_GRADES.length;i++){if(total>=FORTUNE_GRADES[i].min){grade=FORTUNE_GRADES[i];break;}}
+
+  // 등급 표시
+  document.getElementById('f-grade').textContent=grade.emoji;
+  document.getElementById('f-grade-txt').textContent=grade.txt;
+  document.getElementById('f-grade-txt').style.color=grade.color;
+  var stars=Math.round(total/20);
+  document.getElementById('f-stars').textContent='★'.repeat(stars)+'☆'.repeat(5-stars);
+  document.getElementById('f-subtitle').textContent=grade.sub;
+
+  // 바 세팅
+  function setBar(bfId,bvId,bnId,val,labels){
+    setTimeout(function(){document.getElementById(bfId).style.width=val+'%';},100);
+    document.getElementById(bvId).textContent=val;
+    document.getElementById(bnId).textContent=labels[val>=70?0:val>=50?1:2];
+  }
+  setBar('bf-money','bv-money','bn-money',money,['금전 흐름 良','보통','절약 모드']);
+  setBar('bf-judge','bv-judge','bn-judge',judge,['판단력 최고','보통','신중하게']);
+  setBar('bf-luck', 'bv-luck', 'bn-luck', luck, ['승부운 높음','보통','리스크 주의']);
+  setBar('bf-mind', 'bv-mind', 'bn-mind', mind, ['심리 안정','보통','감정적 주의']);
+
+  // 조언
+  var advCard=document.getElementById('advice-card');
+  advCard.style.background=grade.aColor;
+  advCard.style.borderColor=grade.color+'44';
+  document.getElementById('advice-main').textContent=grade.advice;
+  document.getElementById('advice-main').style.color=grade.color;
+  var advArr=ADVICE_DETAILS[grade.txt]||ADVICE_DETAILS['보통'];
+  document.getElementById('advice-desc').textContent=advArr[seed%advArr.length];
+
+  // 섹터 추천
+  var pool=SECTORS.slice();
+  // 운세에 따라 가중치 변경
+  var preferTags=[];
+  if(total>=70)preferTags.push('growth');
+  if(total<50) preferTags.push('defensive','stable');
+  if(luck>=70) preferTags.push('volatile');
+  if(mind<50)  preferTags.push('stable','defensive');
+  // 시장이 하락세면 방어주 우선
+  if(marketSentiment<-1)preferTags.push('defensive','stable');
+  if(marketSentiment>1) preferTags.push('growth','volatile');
+
+  // 섞고 우선순위 정렬
+  for(var i=pool.length-1;i>0;i--){var j=seed%(i+1);var t=pool[i];pool[i]=pool[j];pool[j]=t;}
+  pool.sort(function(a,b){
+    var sa=a.tags.some(function(t){return preferTags.includes(t);})?1:0;
+    var sb=b.tags.some(function(t){return preferTags.includes(t);})?1:0;
+    return sb-sa;
+  });
+  var picked=pool.slice(0,4);
+
+  var sg=document.getElementById('sector-grid');
+  sg.innerHTML='';
+  picked.forEach(function(s){
+    var div=document.createElement('div');
+    div.className='sector-chip';
+    div.innerHTML='<div class="sector-emoji">'+s.emoji+'</div>'+
+      '<div class="sector-name">'+s.name+'</div>'+
+      '<div class="sector-reason">'+s.reason+'</div>'+
+      s.tags.slice(0,2).map(getSectorTag).join(' ');
+    sg.appendChild(div);
+  });
+
+  // 오늘의 한마디
+  var q=QUOTES[(seed+today.getDate())%QUOTES.length];
+  document.getElementById('quote-txt').textContent='"'+q.txt+'"';
+  document.getElementById('quote-src').textContent=q.src;
+
+  document.getElementById('result').style.display='block';
+  document.querySelector('#result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function reset(){
+  document.getElementById('result').style.display='none';
+  document.getElementById('birth').value='';
+  document.getElementById('lunar').checked=false;
+  document.getElementById('lunar-cvt').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('birth').addEventListener('keydown',function(e){
+  if(e.key==='Enter')calc();
+});
+
+// 지수 로드
+fetchIndex();
+</script>
+</body>
+</html>
