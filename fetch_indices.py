@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
 """
 오늘의 투자 운세 — 지수 데이터 수집 스크립트
-GitHub Actions에서 주기적으로 실행되어 Yahoo Finance에서 지수를 가져와
-data/indices.json 파일로 저장합니다.
+GitHub Actions에서 주기적으로 실행되어 지수를 가져와 data/indices.json에 저장합니다.
+
+- KOSPI·KOSDAQ: 네이버페이 증권의 실시간 폴링 API 사용 (거의 실시간, ~20초 단위 갱신)
+- 다우존스·나스닥: Yahoo Finance 사용
+  (한국 낮 시간엔 미국 장이 닫혀있어 "전일 종가"가 곧 최신 정보이므로
+   실시간 여부가 큰 의미 없음)
 
 서버(GitHub Actions)에서 직접 호출하므로 CORS 문제가 발생하지 않습니다.
-브라우저는 이 JSON 파일만 읽으면 됩니다.
 """
 import json
 import urllib.request
 import urllib.error
 from datetime import datetime, timezone, timedelta
-
-# 가져올 지수 목록 (Yahoo Finance 심볼)
-INDEX_LIST = [
-    {"sym": "^KS11", "name": "KOSPI",   "flag": "🇰🇷"},
-    {"sym": "^KQ11", "name": "KOSDAQ",  "flag": "🇰🇷"},
-    {"sym": "^DJI",  "name": "다우존스", "flag": "🇺🇸"},
-    {"sym": "^IXIC", "name": "나스닥",   "flag": "🇺🇸"},
-]
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -27,16 +22,71 @@ HEADERS = {
 }
 
 
-def fetch_index(sym):
-    """Yahoo Finance v8 chart API에서 지수 하나를 가져온다."""
-    url = (
-        f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}"
-        f"?interval=1d&range=5d"
-    )
+def fetch_json(url, timeout=10):
     req = urllib.request.Request(url, headers=HEADERS)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode())
+
+
+# ── 국내 지수: 네이버 실시간 폴링 API ──
+NAVER_INDEX = [
+    {"code": "KOSPI",  "name": "KOSPI",  "flag": "🇰🇷"},
+    {"code": "KOSDAQ", "name": "KOSDAQ", "flag": "🇰🇷"},
+]
+
+def fetch_naver_index(code):
+    url = f"https://polling.finance.naver.com/api/realtime/domestic/index/{code}"
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode())
+        data = fetch_json(url)
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
+        print(f"  ⚠️  {code} 요청 실패: {e}")
+        return None
+
+    if data.get("resultCode") != "success":
+        print(f"  ⚠️  {code} 응답 오류: {data}")
+        return None
+
+    try:
+        areas = data["result"]["areas"]
+        item = areas[0]["datas"][0]
+    except (KeyError, IndexError):
+        print(f"  ⚠️  {code} 응답 구조 예상과 다름: {json.dumps(data)[:300]}")
+        return None
+
+    # 네이버 실시간 API 필드: nv=현재가, cv=전일대비, cr=등락률, pcv=전일종가
+    cur = item.get("nv")
+    prev = item.get("pcv")
+    chg = item.get("cv")
+    chg_pct = item.get("cr")
+
+    if cur is None:
+        print(f"  ⚠️  {code} 현재가 필드 없음: {item}")
+        return None
+
+    # 값 보정 (없으면 계산)
+    if chg is None and prev is not None:
+        chg = cur - prev
+    if chg_pct is None and prev:
+        chg_pct = (cur - prev) / prev * 100
+
+    return {
+        "val": round(float(cur), 2),
+        "chg": round(float(chg or 0), 2),
+        "chgPct": round(float(chg_pct or 0), 2),
+        "realtime": True,
+    }
+
+
+# ── 해외 지수: Yahoo Finance ──
+YAHOO_INDEX = [
+    {"sym": "^DJI",  "name": "다우존스", "flag": "🇺🇸"},
+    {"sym": "^IXIC", "name": "나스닥",   "flag": "🇺🇸"},
+]
+
+def fetch_yahoo_index(sym):
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=5d"
+    try:
+        data = fetch_json(url)
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
         print(f"  ⚠️  {sym} 요청 실패: {e}")
         return None
@@ -52,15 +102,10 @@ def fetch_index(sym):
 
     if cur is None:
         return None
-
     if prev is None:
-        # 종가 배열에서 직전 종가 추출 시도
         quotes = result[0].get("indicators", {}).get("quote", [{}])[0]
         closes = [c for c in quotes.get("close", []) if c is not None]
-        if len(closes) >= 2:
-            prev = closes[-2]
-        else:
-            prev = cur
+        prev = closes[-2] if len(closes) >= 2 else cur
 
     chg = cur - prev
     chg_pct = (chg / prev * 100) if prev else 0
@@ -69,22 +114,30 @@ def fetch_index(sym):
         "val": round(cur, 2),
         "chg": round(chg, 2),
         "chgPct": round(chg_pct, 2),
+        "realtime": False,
     }
 
 
 def main():
-    print("📊 지수 데이터 수집 시작...")
+    print("📊 지수 데이터 수집 시작...\n")
     indices = []
 
-    for item in INDEX_LIST:
-        print(f"  → {item['name']} ({item['sym']}) 조회 중...")
-        result = fetch_index(item["sym"])
+    print("── 국내 지수 (네이버 실시간) ──")
+    for item in NAVER_INDEX:
+        print(f"  → {item['name']} 조회 중...")
+        result = fetch_naver_index(item["code"])
         if result:
-            indices.append({
-                "name": item["name"],
-                "flag": item["flag"],
-                **result,
-            })
+            indices.append({"name": item["name"], "flag": item["flag"], **result})
+            print(f"    ✅ {item['name']}: {result['val']} ({result['chgPct']:+.2f}%)")
+        else:
+            print(f"    ❌ {item['name']} 수집 실패 — 건너뜀")
+
+    print("\n── 해외 지수 (Yahoo Finance, 전일 종가 기준) ──")
+    for item in YAHOO_INDEX:
+        print(f"  → {item['name']} ({item['sym']}) 조회 중...")
+        result = fetch_yahoo_index(item["sym"])
+        if result:
+            indices.append({"name": item["name"], "flag": item["flag"], **result})
             print(f"    ✅ {item['name']}: {result['val']} ({result['chgPct']:+.2f}%)")
         else:
             print(f"    ❌ {item['name']} 수집 실패 — 건너뜀")
@@ -98,10 +151,10 @@ def main():
     with open("data/indices.json", "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✅ 완료: {len(indices)}/{len(INDEX_LIST)}개 지수 저장됨 → data/indices.json")
+    print(f"\n✅ 완료: {len(indices)}/{len(NAVER_INDEX)+len(YAHOO_INDEX)}개 지수 저장됨")
 
     if not indices:
-        print("⚠️  경고: 수집된 지수가 하나도 없습니다. Yahoo Finance 응답을 확인하세요.")
+        print("⚠️  경고: 수집된 지수가 하나도 없습니다.")
         exit(1)
 
 
