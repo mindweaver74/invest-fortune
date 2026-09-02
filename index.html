@@ -130,7 +130,7 @@ html,body{width:100%;min-height:100%;background:linear-gradient(160deg,#0d1b2a,#
 
   <!-- 지수 현황 -->
   <div class="card">
-    <div class="card-title">📊 오늘의 시장 지수 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.25);">(지연 시세)</span></div>
+    <div class="card-title">📊 오늘의 시장 지수</div>
     <div id="idx-loading">📡 지수 데이터 불러오는 중...</div>
     <div id="idx-err">지수 데이터를 아직 불러오지 못했어요<br>
     <span style="font-size:10px;">(자동 갱신 전이거나 일시 오류 · 운세는 정상 확인 가능!)</span><br>
@@ -352,10 +352,13 @@ function fetchIndex(){
         idxData[v.name]=v;
         var isUp=v.chg>=0, pct=Math.abs(v.chgPct);
         var barW=Math.min(pct/3*100,100);
+        var badge = v.realtime
+          ? '<span style="font-size:8px;background:rgba(46,204,113,0.2);color:#2ecc71;border-radius:20px;padding:1px 5px;margin-left:4px;">실시간</span>'
+          : '<span style="font-size:8px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);border-radius:20px;padding:1px 5px;margin-left:4px;">전일 종가</span>';
         var item=document.createElement('div');
         item.className='index-item';
         item.innerHTML=
-          '<div class="index-name">'+v.flag+' '+v.name+'</div>'+
+          '<div class="index-name">'+v.flag+' '+v.name+badge+'</div>'+
           '<div class="index-val">'+v.val.toLocaleString(undefined,{maximumFractionDigits:2})+'</div>'+
           '<div class="index-chg '+(isUp?'up':'dn')+'">'+
             (isUp?'▲':'▼')+' '+pct.toFixed(2)+'%</div>'+
@@ -363,15 +366,15 @@ function fetchIndex(){
         grid.appendChild(item);
       });
 
-      // 업데이트 시각 표시 (지연 시세임을 명확히 안내)
+      // 업데이트 시각 표시
       var updatedTxt = '';
       try{
         var d = new Date(data.updated_at);
         var now = new Date();
         var diffMin = Math.round((now - d) / 60000);
         var timeStr = d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-        updatedTxt = timeStr + ' 기준 (약 ' + Math.max(diffMin,0) + '분 전) · 지연 시세';
-      }catch(e){ updatedTxt = '지연 시세 (Yahoo Finance 기준, 실시간 아님)'; }
+        updatedTxt = timeStr + ' 갱신 (약 ' + Math.max(diffMin,0) + '분 전) · 국내 실시간 / 해외 전일 종가';
+      }catch(e){ updatedTxt = '국내 실시간 / 해외 전일 종가 기준'; }
       document.getElementById('idx-time').textContent = updatedTxt;
 
       var avgChg=indices.reduce(function(s,v){return s+v.chgPct;},0)/indices.length;
