@@ -34,45 +34,66 @@ NAVER_INDEX = [
     {"code": "KOSDAQ", "name": "KOSDAQ", "flag": "🇰🇷"},
 ]
 
+def _first_of(d, keys):
+    """딕셔너리에서 여러 후보 키 중 처음 발견되는 값을 반환."""
+    for k in keys:
+        if k in d and d[k] is not None:
+            return d[k]
+    return None
+
+
 def fetch_naver_index(code):
     url = f"https://polling.finance.naver.com/api/realtime/domestic/index/{code}"
     try:
-        data = fetch_json(url)
+        raw = fetch_json(url)
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
         print(f"  ⚠️  {code} 요청 실패: {e}")
         return None
 
-    if data.get("resultCode") != "success":
-        print(f"  ⚠️  {code} 응답 오류: {data}")
+    print(f"  🔍 {code} 원본 응답(디버그, 500자): {json.dumps(raw, ensure_ascii=False)[:500]}")
+
+    if raw.get("resultCode") not in (None, "success"):
+        print(f"  ⚠️  {code} 응답 오류(resultCode={raw.get('resultCode')})")
         return None
 
+    # 응답 구조가 바뀌었을 가능성에 대비해 여러 경로를 시도
+    item = None
     try:
-        areas = data["result"]["areas"]
-        item = areas[0]["datas"][0]
-    except (KeyError, IndexError):
-        print(f"  ⚠️  {code} 응답 구조 예상과 다름: {json.dumps(data)[:300]}")
+        item = raw["result"]["areas"][0]["datas"][0]
+    except (KeyError, IndexError, TypeError):
+        pass
+    if item is None:
+        try:
+            item = raw["datas"][0]
+        except (KeyError, IndexError, TypeError):
+            pass
+    if item is None and isinstance(raw.get("result"), dict):
+        item = raw["result"]
+    if item is None:
+        print(f"  ⚠️  {code} 응답 구조에서 데이터 항목을 찾지 못함")
         return None
 
-    # 네이버 실시간 API 필드: nv=현재가, cv=전일대비, cr=등락률, pcv=전일종가
-    cur = item.get("nv")
-    prev = item.get("pcv")
-    chg = item.get("cv")
-    chg_pct = item.get("cr")
+    # 가능한 필드명 후보들을 모두 시도 (실제 필드명이 확인되면 여기만 좁히면 됨)
+    cur = _first_of(item, ["nv", "closePrice", "tradePrice", "close", "currentPrice", "price"])
+    prev = _first_of(item, ["pcv", "prevClosePrice", "basePrice", "previousClose", "sv"])
+    chg = _first_of(item, ["cv", "changePrice", "change", "compareToPreviousClosePrice"])
+    chg_pct = _first_of(item, ["cr", "changeRate", "fluctuationsRatio", "rate"])
 
     if cur is None:
-        print(f"  ⚠️  {code} 현재가 필드 없음: {item}")
+        print(f"  ⚠️  {code} 현재가 필드를 찾지 못함. 항목 내용: {json.dumps(item, ensure_ascii=False)[:300]}")
         return None
 
-    # 값 보정 (없으면 계산)
-    if chg is None and prev is not None:
-        chg = cur - prev
-    if chg_pct is None and prev:
-        chg_pct = (cur - prev) / prev * 100
+    cur = float(cur)
+    prev = float(prev) if prev is not None else None
+    chg = float(chg) if chg is not None else (cur - prev if prev is not None else 0.0)
+    chg_pct = float(chg_pct) if chg_pct is not None else (
+        (chg / prev * 100) if prev else 0.0
+    )
 
     return {
-        "val": round(float(cur), 2),
-        "chg": round(float(chg or 0), 2),
-        "chgPct": round(float(chg_pct or 0), 2),
+        "val": round(cur, 2),
+        "chg": round(chg, 2),
+        "chgPct": round(chg_pct, 2),
         "realtime": True,
     }
 
