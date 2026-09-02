@@ -1,5 +1,33 @@
 {
-  "updated_at": null,
-  "indices": []
+  "updated_at": "2026-09-02T09:54:10.056226+09:00",
+  "indices": [
+    {
+      "name": "KOSPI",
+      "flag": "🇰🇷",
+      "val": 6676.53,
+      "chg": -131.68,
+      "chgPct": -1.93
+    },
+    {
+      "name": "KOSDAQ",
+      "flag": "🇰🇷",
+      "val": 815.4,
+      "chg": -11.47,
+      "chgPct": -1.39
+    },
+    {
+      "name": "다우존스",
+      "flag": "🇺🇸",
+      "val": 52766.88,
+      "chg": -810.52,
+      "chgPct": -1.51
+    },
+    {
+      "name": "나스닥",
+      "flag": "🇺🇸",
+      "val": 26099.77,
+      "chg": -51.53,
+      "chgPct": -0.2
+    }
+  ]
 }
-
