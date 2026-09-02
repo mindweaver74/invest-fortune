@@ -3,9 +3,9 @@ name: Update Investment Indices
 # 실행 조건: 평일 한국 장중 시간대(9시~16시) 매시간 + 수동 실행
 on:
   schedule:
-    # UTC 기준. 한국시간(KST=UTC+9) 09:00~16:00 사이 30분마다
-    # UTC 00:00~07:30 = KST 09:00~16:30 (30분 단위)
-    - cron: '0,30 0-7 * * 1-5'
+    # UTC 기준. 한국시간(KST=UTC+9) 09:00~16:00 사이 10분마다
+    # UTC 00:00~07:00 = KST 09:00~16:00
+    - cron: '*/10 0-7 * * 1-5'
   workflow_dispatch: {}   # Actions 탭에서 수동으로도 실행 가능
 
 permissions:
