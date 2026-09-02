@@ -1,0 +1,59 @@
+name: Update Investment Indices
+
+# 실행 조건: 평일 한국 장중 시간대(9시~16시) 매시간 + 수동 실행
+# (재등록용 주석: 2026-09-02)
+on:
+  schedule:
+    # UTC 기준. 한국시간(KST=UTC+9) 09:00~16:00 사이 5분마다
+    # UTC 00:00~07:00 = KST 09:00~16:00
+    # 분을 2로 살짝 어긋나게 둬서(2,7,12...) 정각 몰림으로 인한 실행 지연을 피함
+    - cron: '2,7,12,17,22,27,32,37,42,47,52,57 0-7 * * 1-5'
+  workflow_dispatch: {}   # Actions 탭에서 수동으로도 실행 가능
+
+permissions:
+  contents: write
+
+# 같은 워크플로우가 겹쳐서 실행되는 것을 방지 (push 충돌의 주 원인)
+# 새 실행이 시작되면 이전에 대기 중이던 실행은 취소하고 최신 것만 진행
+concurrency:
+  group: update-indices
+  cancel-in-progress: false
+
+jobs:
+  update-indices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v5
+
+      - name: Python 설치
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: data 폴더 생성
+        run: mkdir -p data
+
+      - name: 지수 데이터 수집
+        run: python fetch_indices.py
+
+      - name: 변경사항 커밋 & 푸시 (충돌 시 재시도)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/indices.json
+          git diff --staged --quiet && { echo "변경사항 없음 - 건너뜀"; exit 0; }
+          git commit -m "chore: update market indices ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+
+          # push 시도, 실패하면 최신 내용 받아서 재시도 (최대 5회)
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "✅ push 성공"
+              exit 0
+            fi
+            echo "⚠️  push 실패, 재시도 $i/5 ..."
+            git pull --rebase origin main
+            sleep 3
+          done
+          echo "❌ 5회 재시도 후에도 실패"
+          exit 1
