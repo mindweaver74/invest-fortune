@@ -1,0 +1,38 @@
+name: Update Investment Indices
+
+# 실행 조건: 평일 한국 장중 시간대(9시~16시) 매시간 + 수동 실행
+on:
+  schedule:
+    # UTC 기준. 한국시간(KST=UTC+9) 09:00~16:00 사이 매시 정각
+    # UTC 00:00~07:00 = KST 09:00~16:00
+    - cron: '0 0-7 * * 1-5'
+  workflow_dispatch: {}   # Actions 탭에서 수동으로도 실행 가능
+
+permissions:
+  contents: write
+
+jobs:
+  update-indices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: data 폴더 생성
+        run: mkdir -p data
+
+      - name: 지수 데이터 수집
+        run: python fetch_indices.py
+
+      - name: 변경사항 커밋 & 푸시
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/indices.json
+          git diff --staged --quiet || git commit -m "chore: update market indices ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+          git push
