@@ -350,7 +350,7 @@ function fetchIndex(){
       grid.innerHTML='';
       indices.forEach(function(v){
         idxData[v.name]=v;
-        var isUp=v.chg>=0, pct=Math.abs(v.chgPct);
+        var isUp=v.chg>=0, pct=Math.abs(v.chgPct), chgAbs=Math.abs(v.chg);
         var barW=Math.min(pct/3*100,100);
         var badge = v.realtime
           ? '<span style="font-size:8px;background:rgba(46,204,113,0.2);color:#2ecc71;border-radius:20px;padding:1px 5px;margin-left:4px;">실시간</span>'
@@ -361,7 +361,7 @@ function fetchIndex(){
           '<div class="index-name">'+v.flag+' '+v.name+badge+'</div>'+
           '<div class="index-val">'+v.val.toLocaleString(undefined,{maximumFractionDigits:2})+'</div>'+
           '<div class="index-chg '+(isUp?'up':'dn')+'">'+
-            (isUp?'▲':'▼')+' '+pct.toFixed(2)+'%</div>'+
+            (isUp?'▲':'▼')+' '+chgAbs.toLocaleString(undefined,{maximumFractionDigits:2})+' ('+pct.toFixed(2)+'%)</div>'+
           '<div class="index-bar"><div class="index-bar-fill" style="width:'+barW+'%;background:'+(isUp?'#e74c3c':'#3498db')+'"></div></div>';
         grid.appendChild(item);
       });
