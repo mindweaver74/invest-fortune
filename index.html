@@ -394,10 +394,10 @@ function setIdxSentiment(avgChg){
 
 // ── 운세 계산 ──
 var FORTUNE_GRADES=[
-  {min:85,emoji:'🌟',txt:'투자 대길일',sub:'오늘은 별들이 당신 편!',color:'#f39c12',advice:'적극 매수',aColor:'rgba(243,156,18,0.15)'},
-  {min:70,emoji:'☀️',txt:'투자 길일',sub:'긍정적인 흐름의 하루',color:'#2ecc71',advice:'관심 종목 분할 매수 고려',aColor:'rgba(46,204,113,0.12)'},
-  {min:55,emoji:'⛅',txt:'보통',sub:'평온한 흐름, 신중하게',color:'#3498db',advice:'관망 또는 소량 매수',aColor:'rgba(52,152,219,0.12)'},
-  {min:40,emoji:'☁️',txt:'주의 필요',sub:'오늘은 서두르지 마세요',color:'#e67e22',advice:'관망 추천',aColor:'rgba(230,126,34,0.12)'},
+  {min:78,emoji:'🌟',txt:'투자 대길일',sub:'오늘은 별들이 당신 편!',color:'#f39c12',advice:'적극 매수',aColor:'rgba(243,156,18,0.15)'},
+  {min:69,emoji:'☀️',txt:'투자 길일',sub:'긍정적인 흐름의 하루',color:'#2ecc71',advice:'관심 종목 분할 매수 고려',aColor:'rgba(46,204,113,0.12)'},
+  {min:61,emoji:'⛅',txt:'보통',sub:'평온한 흐름, 신중하게',color:'#3498db',advice:'관망 또는 소량 매수',aColor:'rgba(52,152,219,0.12)'},
+  {min:51,emoji:'☁️',txt:'주의 필요',sub:'오늘은 서두르지 마세요',color:'#e67e22',advice:'관망 추천',aColor:'rgba(230,126,34,0.12)'},
   {min:0, emoji:'⛈️',txt:'투자 흉일',sub:'리스크 관리에 집중하는 날',color:'#e74c3c',advice:'매도 or 현금 보유',aColor:'rgba(231,76,60,0.12)'},
 ];
 
@@ -405,24 +405,82 @@ var ADVICE_DETAILS={
   '투자 대길일':[
     '오늘은 직감이 날카롭고 판단력이 뛰어난 날이에요. 평소 관심 갖던 종목에 과감하게 접근해볼 만한 타이밍입니다. 단, 욕심은 금물 — 목표 수익률을 미리 정하고 지키세요.',
     '에너지가 넘치고 긍정적인 기운이 충만한 날! 시장 흐름을 잘 읽을 수 있는 날이니 적극적으로 시장에 참여해보세요. 다만 레버리지 과용은 항상 주의하세요.',
+    '오늘의 당신은 촉이 살아있는 날! 다만 대길일일수록 원칙 매매가 빛을 발해요. 미리 세운 시나리오 안에서만 움직이세요.',
+    '운이 좋은 날은 수익을 내는 날이 아니라 실수를 안 하는 날이에요. 좋은 흐름에 올라타되 분할 진입은 잊지 마세요.',
+    '별들이 정렬된 듯한 하루! 관심 종목 중 확신이 가장 큰 하나에 집중해보세요. 이것저것 벌리면 운도 분산됩니다.',
+    '오늘 같은 날은 기회가 눈에 잘 보여요. 단, 남들이 다 아는 기회는 이미 기회가 아닐 수 있으니 한 박자 검증 후 진입하세요.',
   ],
   '투자 길일':[
     '전반적으로 긍정적인 에너지의 날이에요. 분할 매수 전략으로 차근차근 접근하면 좋겠습니다. 급하게 전부 투자하기보다 1/3씩 나눠서 진입하는 것을 권장해요.',
     '오늘은 운이 따르는 날이지만 신중함도 함께하면 더욱 빛납니다. 오전 시장 흐름을 보고 오후에 결정하는 전략도 좋아요.',
+    '순풍이 부는 날이에요. 다만 순풍에도 돛을 다 펴진 마세요. 계획한 물량의 절반만 먼저 싣는 여유가 수익을 지켜줍니다.',
+    '흐름이 나쁘지 않은 날! 기존 보유 종목 중 잘 크는 놈에 물을 주고, 시든 놈은 정리를 고민해보기 좋은 타이밍이에요.',
+    '운이 슬며시 미소 짓는 날이에요. 큰 베팅보다는 꾸준한 적립식 마인드가 오늘의 운과 가장 잘 어울립니다.',
+    '괜찮은 기운의 하루지만 과신은 금물! 매수 전에 "이 가격에 사도 3년 들고 갈 수 있나?" 한 번만 자문해보세요.',
   ],
   '보통':[
     '오늘은 크게 욕심 내지 않는 것이 좋아요. 기존 보유 종목을 점검하고 포트폴리오 균형을 살펴보는 날로 활용해보세요.',
     '시장을 관찰하면서 다음 기회를 준비하는 날이에요. 무리한 신규 투자보다는 공부와 분석에 집중하는 것을 추천해요.',
+    '무난한 날엔 무난하게! 신규 진입보다는 관심 종목 리스트를 정리하고 매수 희망가를 미리 적어두는 준비의 날로 쓰세요.',
+    '오늘은 시장보다 내 계좌를 들여다보는 날이에요. 비중이 한쪽에 쏠려 있진 않은지 점검해보세요.',
+    '운세가 중립일 땐 원칙이 곧 운입니다. 정해둔 룰대로만 움직이면 평범한 날도 손해 보지 않는 날이 돼요.',
+    '크게 벌 날도, 크게 잃을 날도 아니에요. 이런 날 무리하면 꼭 탈이 나니, 커피 한 잔과 함께 시장 구경만 해도 충분해요.',
   ],
   '주의 필요':[
     '오늘은 성급한 판단을 자제하는 것이 좋아요. 손절해야 할 종목이 있다면 감정적으로 대응하지 말고 냉정하게 판단하세요.',
     '리스크 관리가 중요한 날이에요. 신규 매수는 자제하고 기존 포지션을 점검하며 손실을 최소화하는 데 집중하세요.',
+    '오늘은 브레이크를 먼저 점검하는 날이에요. 신규 매수 버튼에 손이 가면 내일의 나에게 한 번 물어보고 누르세요.',
+    '판단이 흐려지기 쉬운 날이에요. 특히 "물타기"의 유혹을 조심하세요. 평단가는 낮아져도 리스크는 커집니다.',
+    '주의가 필요한 날엔 금액을 줄이는 게 최고의 방어예요. 꼭 매매해야 한다면 평소의 절반 이하로만 움직이세요.',
+    '오늘은 뉴스와 소문에 휘둘리기 쉬운 기운이에요. 확인되지 않은 정보로 매매하지 말고, 원래 계획만 지키세요.',
   ],
   '투자 흉일':[
     '오늘은 시장과 잠시 거리를 두는 것이 상책이에요. 현금 비중을 높이고 충동적인 매매를 삼가세요. 때로는 아무것도 하지 않는 것이 최고의 전략입니다.',
     '오늘은 쉬어가는 날이에요. 억지로 수익을 내려 하다 손실이 커질 수 있어요. 내일 더 좋은 기회가 올 거예요.',
+    '폭풍우 치는 날엔 항해하지 않는 게 선장의 실력이에요. 오늘은 HTS를 닫고 산책을 다녀오는 것도 훌륭한 투자입니다.',
+    '오늘의 최고 수익률은 "매매 안 함"일 수 있어요. 현금도 포지션이라는 말, 오늘을 위해 있는 말이에요.',
+    '흉일에 억지로 만회하려다 손실이 눈덩이가 되는 법이에요. 오늘의 목표는 수익이 아니라 생존입니다.',
+    '기운이 험한 날이에요. 계좌 대신 책을 열어보세요. 오늘 아낀 돈이 내일의 총알이 됩니다.',
   ],
 };
+
+// ── 시장 상황별 코멘트 (조언 뒤에 결합) ──
+var MARKET_COMMENTS={
+  crash_hi:[
+    '📉 오늘 시장은 큰 폭 하락 중이지만, 당신의 운세라면 낙폭과대 우량주를 살펴볼 만해요. 단, 떨어지는 칼날은 나눠 잡기 — 반드시 분할로 접근하세요.',
+    '📉 시장이 흔들리는 지금이 오히려 준비된 사람의 시간! 평소 비싸서 못 샀던 종목의 가격을 확인해보세요. 물론 한 번에 올인은 금물입니다.',
+  ],
+  crash_lo:[
+    '📉 오늘은 시장도 크게 하락 중이에요. 지금은 줍는 날이 아니라 지키는 날 — 현금 비중을 유지하며 바닥 신호를 기다리세요.',
+    '📉 시장 급락에 오늘의 기운까지 고려하면 관망이 상책이에요. 반등은 도망가지 않으니 서두르지 마세요.',
+  ],
+  down:[
+    '🌧️ 오늘 시장은 약세 흐름이에요. 무리한 추격 매수보다는 관심 종목의 지지선을 확인하며 기다리는 전략이 유리합니다.',
+    '🌧️ 지수가 주춤한 날이에요. 이런 날은 좋은 기업과 싼 기업을 구분하는 눈이 필요해요. 싸졌다고 다 기회는 아닙니다.',
+  ],
+  flat:[
+    '⛅ 오늘 시장은 뚜렷한 방향 없이 혼조세예요. 방향이 없을 땐 개별 종목의 재료가 더 중요해집니다.',
+    '⛅ 지수는 보합권이에요. 시장 눈치보다 내 종목의 펀더멘털에 집중하기 좋은 날입니다.',
+  ],
+  up:[
+    '🌤️ 오늘 시장은 상승 흐름이에요. 다만 오르는 날일수록 추격 매수는 신중하게 — 눌림목을 기다리는 인내가 수익을 만듭니다.',
+    '🌤️ 지수가 순항 중이에요. 보유 종목이 함께 오르고 있다면 목표가 도달 시 분할 익절 계획도 세워두세요.',
+  ],
+  surge:[
+    '🚀 오늘 시장은 강한 상승세! 분위기에 취하기 쉬운 날이니 목표 수익률과 손절선을 미리 정해두고 움직이세요.',
+    '🚀 시장이 뜨겁게 달아오른 날이에요. 모두가 탐욕스러울 때를 경계하라는 말처럼, 수익 실현 원칙을 지키는 게 중요합니다.',
+  ],
+};
+function marketComment(seed,dipMode){
+  var k;
+  if(marketSentiment<=-2)k=dipMode?'crash_hi':'crash_lo';
+  else if(marketSentiment<-0.5)k='down';
+  else if(marketSentiment<=0.5)k='flat';
+  else if(marketSentiment<2)k='up';
+  else k='surge';
+  var arr=MARKET_COMMENTS[k];
+  return arr[seed%arr.length];
+}
 
 var SECTORS=[
   {emoji:'💻',name:'IT·반도체',  reason:'기술주 성장세 관심',  tags:['growth','volatile']},
@@ -488,12 +546,20 @@ function calc(){
   var luck  =35+(r3%60);
   var mind  =35+(r4%60);
 
-  // 시장 심리 반영 (±10점)
-  var mBonus=Math.round(marketSentiment*3);
+  // 시장 심리 반영 — 방향성은 약하게, 개인 판단력에 따른 차등은 강하게
+  // (판단력이 높으면 변동장이 기회, 낮으면 리스크: "공포에 탐욕" 컨셉)
+  var mBonus=Math.round(marketSentiment*1.5 + Math.abs(marketSentiment)*(judge-65)/12);
   money =Math.max(5,Math.min(99,money +mBonus));
   judge =Math.max(5,Math.min(99,judge +mBonus));
 
-  var total=Math.round((money+judge+luck+mind)/4);
+  // 평균 50% + 중앙범위(최고·최저 평균) 50% — "보통" 쏠림 완화, 대길·흉 등급 활성화
+  var avgScore=(money+judge+luck+mind)/4;
+  var mxScore=Math.max(money,judge,luck,mind);
+  var mnScore=Math.min(money,judge,luck,mind);
+  var total=Math.round(avgScore*0.5+(mxScore+mnScore)/2*0.5);
+
+  // 하락장 저가매수 모드: 총운·심리안정이 받쳐주는 사람만
+  var dipMode=(total>=65&&mind>=60);
 
   // 등급
   var grade=FORTUNE_GRADES[FORTUNE_GRADES.length-1];
@@ -525,7 +591,7 @@ function calc(){
   document.getElementById('advice-main').textContent=grade.advice;
   document.getElementById('advice-main').style.color=grade.color;
   var advArr=ADVICE_DETAILS[grade.txt]||ADVICE_DETAILS['보통'];
-  document.getElementById('advice-desc').textContent=advArr[seed%advArr.length];
+  document.getElementById('advice-desc').textContent=advArr[seed%advArr.length]+' '+marketComment(seed,dipMode);
 
   // 섹터 추천
   var pool=SECTORS.slice();
@@ -535,8 +601,11 @@ function calc(){
   if(total<50) preferTags.push('defensive','stable');
   if(luck>=70) preferTags.push('volatile');
   if(mind<50)  preferTags.push('stable','defensive');
-  // 시장이 하락세면 방어주 우선
-  if(marketSentiment<-1)preferTags.push('defensive','stable');
+  // 하락장: 운세·심리에 따라 분기 (전원 방어주 쏠림 방지)
+  if(marketSentiment<-1){
+    if(dipMode)preferTags.push('growth','value'); // 낙폭과대 우량주 관심
+    else preferTags.push('defensive','stable');
+  }
   if(marketSentiment>1) preferTags.push('growth','volatile');
 
   // 섞고 우선순위 정렬
