@@ -37,7 +37,7 @@ html,body{width:100%;min-height:100%;background:linear-gradient(160deg,#0d1b2a,#
 .index-name{font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px;}
 .index-val{font-size:16px;font-weight:900;color:#fff;margin-bottom:2px;}
 .index-chg{font-size:11px;font-weight:700;}
-.up{color:#2ecc71;} .dn{color:#e74c3c;} .flat{color:rgba(255,255,255,0.4);}
+.up{color:#e74c3c;} .dn{color:#3498db;} .flat{color:rgba(255,255,255,0.4);}
 .index-bar{height:3px;border-radius:2px;background:rgba(255,255,255,0.08);margin-top:6px;overflow:hidden;}
 .index-bar-fill{height:100%;border-radius:2px;transition:width .8s;}
 #idx-loading{text-align:center;padding:12px;font-size:12px;color:rgba(255,255,255,0.35);}
@@ -362,7 +362,7 @@ function fetchIndex(){
           '<div class="index-val">'+v.val.toLocaleString(undefined,{maximumFractionDigits:2})+'</div>'+
           '<div class="index-chg '+(isUp?'up':'dn')+'">'+
             (isUp?'▲':'▼')+' '+pct.toFixed(2)+'%</div>'+
-          '<div class="index-bar"><div class="index-bar-fill" style="width:'+barW+'%;background:'+(isUp?'#2ecc71':'#e74c3c')+'"></div></div>';
+          '<div class="index-bar"><div class="index-bar-fill" style="width:'+barW+'%;background:'+(isUp?'#e74c3c':'#3498db')+'"></div></div>';
         grid.appendChild(item);
       });
 
