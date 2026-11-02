@@ -1,20 +1,20 @@
 {
-  "updated_at": "2026-11-02T14:55:19.487283+09:00",
+  "updated_at": "2026-11-02T15:00:38.064583+09:00",
   "indices": [
     {
       "name": "KOSPI",
       "flag": "🇰🇷",
-      "val": 5878.0,
-      "chg": 147.26,
-      "chgPct": 2.57,
+      "val": 5891.99,
+      "chg": 161.25,
+      "chgPct": 2.81,
       "realtime": true
     },
     {
       "name": "KOSDAQ",
       "flag": "🇰🇷",
-      "val": 734.61,
-      "chg": 10.23,
-      "chgPct": 1.41,
+      "val": 734.79,
+      "chg": 10.41,
+      "chgPct": 1.44,
       "realtime": true
     },
     {
